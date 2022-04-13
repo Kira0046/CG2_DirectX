@@ -53,6 +53,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	MSG msg{}; // メッセージ
 // DirectX初期化処理 ここから
+// 
 // DirectX初期化処理 ここまで
 // ゲームループ
 	while (true) {
@@ -66,6 +67,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			break;
 		}
 		// DirectX毎フレーム処理 ここから
+		// 
 		// DirectX毎フレーム処理 ここまで
 	}
 	// ウィンドウクラスを登録解除
