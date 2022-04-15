@@ -249,7 +249,7 @@ debugController->EnableDebugLayer();
 		// コマンドの実行完了を待つ
 		commandQueue->Signal(fence, ++fenceVal);
 		if (fence->GetCompletedValue() != fenceVal) {
-			HANDLE event = CreateEvent(nullptr, false, false, nullptr);01
+			HANDLE event = CreateEvent(nullptr, false, false, nullptr);
 			fence->SetEventOnCompletion(fenceVal, event);
 			WaitForSingleObject(event, INFINITE);
 			CloseHandle(event);
