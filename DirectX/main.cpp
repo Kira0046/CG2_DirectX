@@ -239,10 +239,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//描画初期化処理
 	// 頂点データ
 	Vertex vertices[] = {
-		{{   0.0f, 100.0f, 0.0f },{ 0.0f, 1.0f }}, // 左下
-		{{   0.0f,   0.0f, 0.0f },{ 0.0f, 0.0f }}, // 左上
-		{{ 100.0f, 100.0f, 0.0f },{ 1.0f, 1.0f }}, // 右下
-		{{ 100.0f,   0.0f, 0.0f },{ 1.0f, 0.0f }}, // 右上
+		{{ -50.0f, -50.0f, 50.0f },{ 0.0f, 1.0f }}, // 左下
+		{{ -50.0f,  50.0f, 50.0f },{ 0.0f, 0.0f }}, // 左上
+		{{  50.0f, -50.0f, 50.0f },{ 1.0f, 1.0f }}, // 右下
+		{{  50.0f,  50.0f, 50.0f },{ 1.0f, 0.0f }}, // 右上
 	};
 	// インデックスデータ
 	unsigned short indices[] =
@@ -517,7 +517,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	constMapTransform->mat.r[3].m128_f32[0] = -1.0f;
 	constMapTransform->mat.r[3].m128_f32[1] =  1.0f;
 
+	XMMATRIX matProjection = 
+	constMapTransform->mat = XMMatrixPerspectiveFovLH(
+		XMConvertToRadians(45.0f),
+		(float)window_width / window_height,
+		0.1f, 1000.0f
+	);
 
+	//定数バッファに転送
+	constMapTransform->mat = matProjection;
+	
 	
 	TexMetadata metadata{};
 	ScratchImage scratchImg{};
