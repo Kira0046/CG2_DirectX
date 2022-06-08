@@ -239,10 +239,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//描画初期化処理
 	// 頂点データ
 	Vertex vertices[] = {
-		{{ -50.0f, -50.0f, 50.0f },{ 0.0f, 1.0f }}, // 左下
-		{{ -50.0f,  50.0f, 50.0f },{ 0.0f, 0.0f }}, // 左上
-		{{  50.0f, -50.0f, 50.0f },{ 1.0f, 1.0f }}, // 右下
-		{{  50.0f,  50.0f, 50.0f },{ 1.0f, 0.0f }}, // 右上
+		//      x       y     z        u     v
+		{{ -50.0f, -50.0f, 0.0f },{ 0.0f, 1.0f }}, // 左下
+		{{ -50.0f,  50.0f, 0.0f },{ 0.0f, 0.0f }}, // 左上
+		{{  50.0f, -50.0f, 0.0f },{ 1.0f, 1.0f }}, // 右下
+		{{  50.0f,  50.0f, 0.0f },{ 1.0f, 0.0f }}, // 右上
 	};
 	// インデックスデータ
 	unsigned short indices[] =
@@ -517,16 +518,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	constMapTransform->mat.r[3].m128_f32[0] = -1.0f;
 	constMapTransform->mat.r[3].m128_f32[1] =  1.0f;
 
+	//射影変換行列
 	XMMATRIX matProjection = 
 	constMapTransform->mat = XMMatrixPerspectiveFovLH(
 		XMConvertToRadians(45.0f),
 		(float)window_width / window_height,
 		0.1f, 1000.0f
 	);
+	//ビュー変換行列
+	XMMATRIX matView;
+	XMFLOAT3 eye(0, 0, -200);
+	XMFLOAT3 target(0, 0, 0);
+	XMFLOAT3 up(0, 1, 0);
+	matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 
 	//定数バッファに転送
-	constMapTransform->mat = matProjection;
+	constMapTransform->mat = matView * matProjection;
 	
+	float angle = 0.0f;
 	
 	TexMetadata metadata{};
 	ScratchImage scratchImg{};
@@ -754,6 +763,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		if (key[DIK_0]) {
 			OutputDebugStringA("Hit 0\n");
 		}
+
+		if (key[DIK_D] || key[DIK_A]) {
+			if (key[DIK_D]) { angle += XMConvertToRadians(1.0f); }
+			else if (key[DIK_A]) { angle -= XMConvertToRadians(1.0f); }
+
+			eye.x = -200 * sinf(angle);
+			eye.z = -200 * cosf(angle);
+
+			//ビュー変換作り直し
+			matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
+		}
+
+		//定数バッファに転送
+		constMapTransform->mat = matView * matProjection;
+
 
 		// DirectX毎フレーム処理 ここから
 		//constMapMaterial->color.y += 0.01f;
