@@ -519,21 +519,46 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	constMapTransform->mat.r[3].m128_f32[1] =  1.0f;
 
 	//射影変換行列
-	XMMATRIX matProjection = 
-	constMapTransform->mat = XMMatrixPerspectiveFovLH(
-		XMConvertToRadians(45.0f),
-		(float)window_width / window_height,
-		0.1f, 1000.0f
-	);
+	XMMATRIX matProjection = constMapTransform->mat =
+		XMMatrixPerspectiveFovLH(XMConvertToRadians(45.0f),(float)window_width / window_height,0.1f, 1000.0f);
 	//ビュー変換行列
 	XMMATRIX matView;
 	XMFLOAT3 eye(0, 0, -200);
 	XMFLOAT3 target(0, 0, 0);
 	XMFLOAT3 up(0, 1, 0);
 	matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
+	//ワールド変換行列
+	XMMATRIX matWorld;
+	matWorld = XMMatrixIdentity();
+
+
+	//座標
+	XMFLOAT3 position = { 0.0f,0.0f,0.0f };
+	//回転角
+	XMFLOAT3 rotation = { 0.0f,0.0f,0.0f };
+	//スケーリング倍率
+	XMFLOAT3 scale = { 1.0f,1.0f,1.0f };
+
+	//スケーリング
+	XMMATRIX matScale;
+	matScale = XMMatrixScaling(scale.x, scale.y, scale.z);
+	matWorld *= matScale;
+	//回転
+	XMMATRIX matRot;
+	matRot = XMMatrixIdentity();
+	matRot *= XMMatrixRotationZ(XMConvertToRadians(rotation.z));
+	matRot *= XMMatrixRotationX(XMConvertToRadians(rotation.x));
+	matRot *= XMMatrixRotationY(XMConvertToRadians(rotation.y));
+	matWorld *= matRot;
+	//平行移動
+	XMMATRIX matTrans;
+	matTrans = XMMatrixTranslation(position.x, position.y, position.z);
+	matWorld *= matTrans;
+	
+
 
 	//定数バッファに転送
-	constMapTransform->mat = matView * matProjection;
+	constMapTransform->mat = matWorld * matView * matProjection;
 	
 	float angle = 0.0f;
 	
@@ -775,8 +800,31 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 		}
 
+		if (key[DIK_UP] || key[DIK_DOWN] || key[DIK_RIGHT] || key[DIK_LEFT]) {
+
+			if (key[DIK_UP]) {
+				position.z += 1.0f;
+			}
+			else if (key[DIK_DOWN]) {
+				position.z -= 1.0f;
+			}
+			if (key[DIK_RIGHT]) {
+				position.x += 1.0f;
+			}
+			else if (key[DIK_LEFT]) {
+				position.x -= 1.0f;
+			}
+		}
+
+		matWorld = XMMatrixIdentity();
+		matWorld *= matScale;
+		matWorld *= matRot;
+		matTrans = XMMatrixTranslation(position.x, position.y, position.z);
+		matWorld *= matTrans;
+
+
 		//定数バッファに転送
-		constMapTransform->mat = matView * matProjection;
+		constMapTransform->mat = matWorld * matView * matProjection;
 
 
 		// DirectX毎フレーム処理 ここから
